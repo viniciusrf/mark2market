@@ -75,7 +75,7 @@ func jurosCompostos() *cobra.Command {
 	}
 
 	cmd.Flags().Float64P("initial", "c", 0, "Valor inicial para cálculo (obrigatório)")
-	cmd.Flags().StringP("dataFim", "f", "", "Mes/Ano da compra (DD/MM/AAAA, obrigatório)")
+	cmd.Flags().StringP("dataFim", "f", "", "Dia/Mes/Ano da compra (DD/MM/AAAA, obrigatório)")
 	cmd.Flags().Float64P("initialRate", "r", 0, "Taxa a adiquirida a.a. no início (em porcentagem, obrigatório)")
 
 	cmd.MarkFlagRequired("initial")
