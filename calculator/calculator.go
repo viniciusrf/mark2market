@@ -25,14 +25,14 @@ func CalculateMarkToMarket(valorInicial, valorVenda, taxaAnual float64, dataComp
 	mesesTotal := int(math.Floor(dataFim.Sub(dataCompra).Hours() / 24 / 30))
 	tempoRestante := int(math.Floor(dataFim.Sub(dataCalculo).Hours() / 24 / 30))
 
-	taxaMensal := math.Pow(1+taxaAnual/100, 1.0/12) - 1
+	taxaMensal := TaxaAnoEmMesesPercToDec(taxaAnual)
 
-	imposto := getAliquotaImposto(mesesPosse)
+	imposto := GetAliquotaImpostoRF(mesesPosse)
 
-	valorVenda = valorVenda - ((valorVenda - valorInicial) * (imposto / 100))
+	valorVenda = RendimentoMenosImposto(valorInicial, valorVenda, imposto)
 
-	valorFinal := valorInicial * math.Pow(1+taxaMensal, float64(mesesTotal-1))
-	// Calcular variações
+	valorFinal := CalcJurosCompostos(valorInicial, taxaMensal, mesesTotal-1)
+
 	variacaoPercent := (valorVenda / valorFinal) * 100
 
 	taxa := (math.Pow(valorFinal/valorVenda, 1/(float64(tempoRestante)/12)) - 1)
@@ -52,8 +52,51 @@ func CalculateMarkToMarket(valorInicial, valorVenda, taxaAnual float64, dataComp
 	}
 }
 
-func getAliquotaImposto(meses int) float64 {
-	dias := meses * 30 // Aproximação de 1 mês = 30 dias
+func TempoAteMeta(valorInicial, valorDesejado, taxaMensal float64, aporteMensal float64) (int, float64) {
+
+	if valorInicial >= valorDesejado {
+		return 0, valorInicial
+	}
+
+	if taxaMensal <= 0 {
+		if aporteMensal <= 0 {
+			return -1, valorInicial
+		}
+		months := math.Ceil((valorDesejado - valorInicial) / aporteMensal)
+		return int(months), valorInicial + (aporteMensal * months)
+	}
+
+	var months int
+	valorAtual := valorInicial
+
+	for valorAtual < valorDesejado {
+		months++
+		valorAtual *= (1 + taxaMensal)
+		valorAtual += aporteMensal
+
+		if months > 1200 {
+			return -1, valorAtual
+		}
+	}
+	return months, valorAtual
+}
+
+func TaxaAnoEmMesesPercToDec(taxaAnual float64) float64 {
+
+	taxaMensal := math.Pow(1+taxaAnual/100, 1.0/12) - 1
+
+	return taxaMensal
+}
+
+func TaxaMesesEmAnoPercToDec(taxaMensalPercentual float64) float64 {
+
+	taxaMensal := taxaMensalPercentual / 100
+	taxaAnual := (math.Pow(1+taxaMensal, 12) - 1) * 100
+	return taxaAnual
+}
+
+func GetAliquotaImpostoRF(meses int) float64 {
+	dias := meses * 30
 
 	switch {
 	case dias <= 180:
@@ -65,4 +108,20 @@ func getAliquotaImposto(meses int) float64 {
 	default:
 		return 15.0
 	}
+}
+
+func CalcJurosCompostos(initial, taxa float64, time int) float64 {
+
+	valorFinal := initial * math.Pow(1+taxa, float64(time))
+
+	return valorFinal
+
+}
+
+func RendimentoMenosImposto(initial, final, imposto float64) float64 {
+
+	valorfinal := final - ((final - initial) * (imposto / 100))
+
+	return valorfinal
+
 }
