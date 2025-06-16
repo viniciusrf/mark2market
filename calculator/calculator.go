@@ -90,10 +90,10 @@ func DeveParcelar(aVista, aPrazo, taxa float64, meses int) (float64, string) {
 		aVista = aVista - parcela
 	}
 
-	message := "Sim!"
+	message := "Não!"
 
 	if aVista >= 0 {
-		message = "Não!"
+		message = "Sim!"
 	}
 
 	return aVista, message
