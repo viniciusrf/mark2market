@@ -81,6 +81,25 @@ func TempoAteMeta(valorInicial, valorDesejado, taxaMensal float64, aporteMensal 
 	return months, valorAtual
 }
 
+func DeveParcelar(aVista, aPrazo, taxa float64, meses int) (float64, string) {
+
+	parcela := aPrazo / float64(meses)
+	for meses > 0 {
+		meses--
+		aVista = CalcJurosCompostos(aVista, taxa, 1)
+		aVista = aVista - parcela
+	}
+
+	message := "Sim!"
+
+	if aVista >= 0 {
+		message = "Não!"
+	}
+
+	return aVista, message
+
+}
+
 func TaxaAnoEmMesesPercToDec(taxaAnual float64) float64 {
 
 	taxaMensal := math.Pow(1+taxaAnual/100, 1.0/12) - 1

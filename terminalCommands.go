@@ -161,3 +161,45 @@ func tempoAteHandler(cmd *cobra.Command, args []string) {
 	}
 
 }
+
+func devoParcelar() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "devoParcelar",
+		Short: "Realiza o cálculo comparativo entre parcelamento e à vista",
+		Long:  `Realiza o cálculo  comparativo entre parcelamento e compra à vista para analisar a melhor opção`,
+		Run:   devoParcelarHandler,
+	}
+
+	cmd.Flags().Float64P("vista", "v", 0, "Valor à vista para cálculo (obrigatório)")
+	cmd.Flags().Float64P("prazo", "p", 0, "Valor a prazo para cálculo (obrigatório)")
+	cmd.Flags().IntP("parc", "m", 0, "Quantidade de parcelas")
+	cmd.Flags().Float64P("taxa", "r", 0, "Taxa de juros base para calculo (em porcentagem, obrigatório)")
+
+	cmd.MarkFlagRequired("vista")
+	cmd.MarkFlagRequired("prazo")
+	cmd.MarkFlagRequired("parc")
+	cmd.MarkFlagRequired("taxa")
+
+	return cmd
+}
+
+func devoParcelarHandler(cmd *cobra.Command, args []string) {
+	aVista, _ := cmd.Flags().GetFloat64("vista")
+	aPrazo, _ := cmd.Flags().GetFloat64("prazo")
+	taxa, _ := cmd.Flags().GetFloat64("taxa")
+	meses, _ := cmd.Flags().GetInt("parc")
+
+	taxa = calculator.TaxaAnoEmMesesPercToDec(taxa)
+
+	value, message := calculator.DeveParcelar(aVista, aPrazo, taxa, meses)
+
+	fmt.Printf("\nCalculo de Juros Compostos\n")
+	fmt.Printf("-------------------------\n")
+	fmt.Printf("Valor à Vista: %15.2f\n", aVista)
+	fmt.Printf("Valor à Prazo: %15.2f\n", aPrazo)
+	fmt.Printf("Taxa: %21.2f%%\n", taxa)
+	fmt.Printf("Tempo de permanencia: %d meses\n", meses)
+	fmt.Printf("Valor economizado: %15.2f\n", value)
+	fmt.Printf("Deve parcelar: %s\n", message)
+
+}

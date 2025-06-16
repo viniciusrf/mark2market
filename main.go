@@ -24,6 +24,7 @@ financeiros de mark-to-market (avaliação a mercado).`,
 	rootCmd.AddCommand(mark2marketValue())
 	rootCmd.AddCommand(jurosCompostos())
 	rootCmd.AddCommand(tempoAte())
+	rootCmd.AddCommand(devoParcelar())
 
 	return rootCmd
 }
